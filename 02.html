@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Matrix Portal - Mobile Ready</title>
+    <style>
+        /* Garante que o fundo ocupe 100% sem barras de rolagem */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: black;
+            /* Evita o efeito de "puxar para atualizar" em navegadores móveis */
+            overscroll-behavior-y: contain;
+        }
+
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="matrix"></canvas>
+
+    <script>
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        const letters = "ﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶｷﾑﾕﾗｾﾈｽﾀﾇﾍｦｲｸｺｿﾁﾄﾉﾌﾔﾖﾙﾚﾛﾝ012345789¦・.=*+-<>";
+        
+        // fontSize menor (14) costuma ficar melhor em telas de celular
+        let fontSize = 14; 
+        let columns;
+        let drops;
+
+        // Função para configurar/ajustar o tamanho do canvas
+        function setupCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            columns = Math.floor(canvas.width / fontSize);
+            
+            // Inicializa ou ajusta o array de gotas
+            // Se já existir, ele mantém o progresso atual e adiciona novas colunas se necessário
+            if (!drops) {
+                drops = Array(columns).fill(1);
+            } else {
+                const oldLength = drops.length;
+                if (columns > oldLength) {
+                    for (let i = oldLength; i < columns; i++) {
+                        drops[i] = Math.random() * canvas.height; 
+                    }
+                }
+            }
+        }
+
+        function draw() {
+            // Efeito de rastro (opacidade baixa para o preto)
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.font = fontSize + "px monospace";
+
+            for (let i = 0; i < drops.length; i++) {
+                // Sorteia um caractere
+                const text = letters[Math.floor(Math.random() * letters.length)];
+                
+                // Define a cor: a "cabeça" da gota é branca, o corpo é verde
+                // Isso dá um efeito muito mais profissional
+                if (Math.random() > 0.99) {
+                    ctx.fillStyle = "#FFF"; 
+                } else {
+                    ctx.fillStyle = "#0F0";
+                }
+
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                // Reseta a gota quando chega ao final da tela
+                // O Math.random() cria o efeito de atraso entre as colunas
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+
+                drops[i]++;
+            }
+        }
+
+        // Configuração inicial
+        setupCanvas();
+
+        // Reajusta quando a tela muda de tamanho (rotação de celular)
+        window.addEventListener('resize', setupCanvas);
+
+        // Roda a animação a aproximadamente 30 frames por segundo
+        setInterval(draw, 33);
+    </script>
+</body>
+</html>
